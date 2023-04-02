@@ -255,7 +255,6 @@ namespace CoreSystems.Platform
                 if (weapon.System.TrackProjectile)
                     Ai.PointDefense = true;
             }
-
             internal bool SequenceReady(Ai.Constructs rootConstruct)
             {
                 var wValues = Data.Repo.Values;
