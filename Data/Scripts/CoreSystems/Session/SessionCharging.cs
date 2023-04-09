@@ -122,7 +122,8 @@ namespace CoreSystems
             var weaponFailure = !ai.HasPower || !comp.IsWorking;
             var invalidStates = ai != comp.Ai || comp.Ai.MarkedForClose || comp.Ai.TopEntity.MarkedForClose || comp.Ai.Concealed || comp.CoreEntity.MarkedForClose || comp.Platform.State != CorePlatform.PlatformState.Ready;
 
-            if (complete || weaponFailure || invalidStates)
+            var failed = weaponFailure || invalidStates;
+            if (complete || failed)
             {
                 var serverFullyLoaded = IsServer && w.ProtoWeaponAmmo.CurrentAmmo == w.Reload.MagsLoaded * w.ActiveAmmoDef.AmmoDef.Const.MagazineSize;
 
@@ -133,8 +134,8 @@ namespace CoreSystems
 
                 if (!complete || allCharged || clientAllDone)
                 {
-                    w.StopPowerDraw(weaponFailure || invalidStates, ai);
-                    return true;
+                    w.StopPowerDraw(failed, ai);
+                    return !failed;
                 }
                 w.Loading = true;
             }
