@@ -37,7 +37,7 @@ namespace CoreSystems.Api
 
                 ["GetAllWeaponDefinitions"] = new Action<IList<byte[]>>(GetAllWeaponDefinitions),
                 ["GetAllWeaponMagazines"] = new Action<IDictionary<MyDefinitionId, List<MyTuple<int, MyTuple<MyDefinitionId, string, string, bool>>>>>(GetAllWeaponMagazines),
-                
+
                 ["GetAllNpcSafeWeaponMagazines"] = new Action<IDictionary<MyDefinitionId, List<MyTuple<int, MyTuple<MyDefinitionId, string, string, bool>>>>>(GetAllNpcSafeWeaponMagazines),
                 ["GetNpcSafeWeapons"] = new Action<ICollection<MyDefinitionId>>(NpcSafeWeapons),
 
@@ -47,7 +47,7 @@ namespace CoreSystems.Api
                 ["GetCorePhantoms"] = new Action<ICollection<MyDefinitionId>>(GetCorePhantoms),
                 ["GetCoreRifles"] = new Action<ICollection<MyDefinitionId>>(GetCoreRifles),
                 ["GetCoreArmors"] = new Action<IList<byte[]>>(GetCoreArmors),
-               
+
                 ["GetMaxPower"] = new Func<MyDefinitionId, float>(GetMaxPower),
                 ["RegisterProjectileAdded"] = new Action<Action<Vector3, float>>(RegisterProjectileAddedCallback),
                 ["UnRegisterProjectileAdded"] = new Action<Action<Vector3, float>>(UnRegisterProjectileAddedCallback),
@@ -55,7 +55,7 @@ namespace CoreSystems.Api
                 ["AddMonitorProjectile"] = new Action<MyEntity, int, Action<long, int, ulong, long, Vector3D, bool>>(MonitorProjectileCallback),
                 ["GetProjectileState"] = new Func<ulong, MyTuple<Vector3D, Vector3D, float, float, long, string>>(GetProjectileState),
                 ["ReleaseAiFocusBase"] = new Func<MyEntity, long, bool>(ReleaseAiFocus),
-                
+
                 ["TargetFocusHandler"] = new Func<long, bool, Func<MyEntity, IMyCharacter, long, int, bool>, bool>(TargetFocusHandler),
                 ["HudHandler"] = new Func<long, bool, Func<IMyCharacter, long, int, bool>, bool>(HudHandler),
                 ["ShootHandler"] = new Func<long, bool, Func<Vector3D, Vector3D, int, bool, object, int, int, int, bool>, bool>(ShootHandler),
@@ -69,6 +69,7 @@ namespace CoreSystems.Api
                 // Entity converted
                 ["ToggleInfiniteAmmoBase"] = new Func<MyEntity, bool>(ToggleInfiniteResources),
                 ["GetProjectilesLockedOnBase"] = new Func<MyEntity, MyTuple<bool, int, int>>(GetProjectilesLockedOn),
+                ["GetProjectilesLockedOnPos"] = new Action<MyEntity, ICollection<Vector3D>>(GetProjectilesLockedOnPos),
                 ["GetProjectilesLockedOn"] = new Func<IMyEntity, MyTuple<bool, int, int>>(GetProjectilesLockedOnLegacy),
                 ["SetAiFocusBase"] = new Func<MyEntity, MyEntity, int, bool>(SetAiFocus),
                 ["SetAiFocus"] = new Func<IMyEntity, IMyEntity, int, bool>(SetAiFocusLegacy),
@@ -810,6 +811,23 @@ namespace CoreSystems.Api
             }
             else tuple = new MyTuple<bool, int, int>(false, 0, -1);
             return tuple;
+        }
+
+        private void GetProjectilesLockedOnPos(MyEntity entity, ICollection<Vector3D> collection)
+        {
+            var victim = entity;
+            var grid = victim.GetTopMostParent();
+            Ai ai;
+            collection.Clear();
+            if (grid != null && Session.I.EntityAIs.TryGetValue(grid, out ai))
+            {
+                var count = ai.LiveProjectile.Count;
+                foreach (var proj in ai.LiveProjectile)
+                {
+                    collection.Add(proj.Position);
+                }
+            }
+            return;
         }
 
         private void GetSortedThreatsLegacy(IMyEntity shooter, ICollection<MyTuple<IMyEntity, float>> collection) => GetSortedThreatsConvert((MyEntity) shooter, collection);
