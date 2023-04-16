@@ -27,7 +27,8 @@ namespace Scripts
                             LargeBlockArtillery,
                             LargeBlockArtilleryTurret,
                             LargeBlockRailgun,
-                            SmallBlockRailgun
+                            SmallBlockRailgun,
+                            LargeSearchlight
                             );
         }
     }

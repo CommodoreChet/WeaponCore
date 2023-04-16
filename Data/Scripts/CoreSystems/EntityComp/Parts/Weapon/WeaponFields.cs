@@ -396,7 +396,7 @@ namespace CoreSystems.Platform
             FuckMyLife();
             
             AiOnlyWeapon = Comp.TypeSpecific != CoreComponent.CompTypeSpecific.VanillaTurret || (Comp.TypeSpecific == CoreComponent.CompTypeSpecific.VanillaTurret && (azimuthPartName != "MissileTurretBase1" && elevationPartName != "MissileTurretBarrels" && azimuthPartName != "InteriorTurretBase1" && elevationPartName != "InteriorTurretBase2" && azimuthPartName != "GatlingTurretBase1" && elevationPartName != "GatlingTurretBase2"));
-
+            if (comp.TypeSpecific == CoreComponent.CompTypeSpecific.SearchLight) AiOnlyWeapon = false; //FML there's got to be a way to roll this into the line above
             VanillaTracking = TurretAttached && !AiOnlyWeapon;
 
             CriticalReaction = Comp.TypeSpecific != CoreComponent.CompTypeSpecific.Phantom && System.Values.HardPoint.HardWare.CriticalReaction.Enable;

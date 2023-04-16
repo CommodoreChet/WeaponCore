@@ -123,13 +123,22 @@ namespace CoreSystems.Support
             {
                 var stator = cube as IMyMotorStator;
                 var tool = cube as IMyShipToolBase;
-                if (stator != null || tool != null )
+                var offense = cube as IMyOffensiveCombatBlock;
+                var flight = cube as IMyFlightMovementBlock;
+                if (stator != null || tool != null || offense != null || flight != null)
                 {
                     if (stator != null)
                         Stators.Add(stator);
 
                     if (tool != null)
                         Tools.Add(tool);
+
+                    if (offense != null)
+                        AiOffense.Add(offense);
+
+                    if (flight != null)
+                        AiFlight.Add(flight);
+
                     return;
                 }
 
@@ -192,8 +201,10 @@ namespace CoreSystems.Support
             {
                 var stator = cube as IMyMotorStator;
                 var tool = cube as IMyShipToolBase;
+                var offense = cube as IMyOffensiveCombatBlock;
+                var flight = cube as IMyFlightMovementBlock;
 
-                if (stator != null || tool != null )
+                if (stator != null || tool != null || offense != null || flight != null)
                 {
                     LastAddToRotorTick = Session.I.Tick;
 
@@ -202,6 +213,13 @@ namespace CoreSystems.Support
 
                     if (tool != null)
                         Tools.Remove(tool);
+
+                    if (offense != null)
+                        AiOffense.Remove(offense);
+
+                    if (flight != null)
+                        AiFlight.Remove(flight);
+
                     return;
                 }
 

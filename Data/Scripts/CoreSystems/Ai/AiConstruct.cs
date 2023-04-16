@@ -4,7 +4,9 @@ using CoreSystems.Platform;
 using CoreSystems.Projectiles;
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
+using SpaceEngineers.Game.EntityComponents.Blocks;
 using VRage.Game;
+using VRage.Game.Components;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
 using VRage.ModAPI;
@@ -64,8 +66,9 @@ namespace CoreSystems.Support
                 var battery = cube as MyBatteryBlock;
                 var stator = cube as IMyMotorStator;
                 var tool = cube as IMyShipToolBase;
-  
-                if (battery != null || cube.HasInventory || stator != null || tool != null)
+                var offense = cube as IMyOffensiveCombatBlock;
+
+                if (battery != null || cube.HasInventory || stator != null || tool != null || offense != null)
                 {
                     FatBlockAdded(cube);
                 }
@@ -83,8 +86,9 @@ namespace CoreSystems.Support
                 var battery = cube as MyBatteryBlock;
                 var stator = cube as IMyMotorStator;
                 var tool = cube as IMyShipToolBase;
+                var offense = cube as IMyOffensiveCombatBlock;
 
-                if (InventoryMonitor.ContainsKey(cube) || battery != null && Batteries.Contains(battery) || stator != null || tool != null)
+                if (InventoryMonitor.ContainsKey(cube) || battery != null && Batteries.Contains(battery) || stator != null || tool != null || offense != null)
                 {
                     FatBlockRemoved(cube);
                 }
@@ -124,6 +128,8 @@ namespace CoreSystems.Support
             internal readonly Ai Ai;
             internal MyEntity LastFocusEntity;
             internal MyEntity LastFocusEntityChecked;
+            internal IMyOffensiveCombatBlock ActiveCombatBlock;
+            internal IMyFlightMovementBlock ActiveFlightBlock;
 
             internal float OptimalDps;
             internal int BlockCount;
@@ -131,6 +137,7 @@ namespace CoreSystems.Support
             internal Ai LargestAi;
             internal bool NewInventoryDetected;
             internal bool HadFocus;
+            internal bool KeenDroneDirty;
             internal int DroneCount;
             internal uint LastDroneTick;
             internal uint LastEffectUpdateTick;
@@ -169,6 +176,57 @@ namespace CoreSystems.Support
             {
                 Ai = ai;
                 Focus = new Focus(ai);
+            }
+
+            internal void ConstructKeenDroneCombatTargetDirty(MyCubeBlock block, IMyEntity newTarg, IMyEntity oldTarg)
+            {
+                if (block == null || block.MarkedForClose) return;
+                var topEntity = block.GetTopMostParent();
+                if (topEntity != null && !topEntity.MarkedForClose)
+                {
+                    Ai ai;
+                    if (Session.I.EntityToMasterAi.TryGetValue(topEntity, out ai))
+                    {
+                        var newTargCheck = newTarg != null;
+                        var oldTargCheck = oldTarg != null;
+                        var distToTarg = 0d;
+
+
+                        if (newTargCheck)
+                        {
+                            distToTarg = Vector3D.Distance(topEntity.PositionComp.WorldAABB.Center, newTarg.PositionComp.WorldAABB.Center);
+                            ai.Construct.Focus.ReassignTarget((MyEntity)newTarg, ai);
+                        }
+                        else
+                            ai.Construct.Focus.RequestReleaseActive(ai, 0);//Is this the correct focus reset/release/cancel?
+
+
+                        foreach (var comp in ai.WeaponComps)
+                        {
+                            if (!comp.HasRequireTarget || comp.HasTurret || comp.HasScanTrackOnly) continue;
+                            if (newTargCheck)
+                                comp.PrimaryWeapon.Target.Set(newTarg, newTarg.PositionComp.WorldAABB.Center, distToTarg, distToTarg, newTarg.GetTopMostParent().EntityId);
+                            if (oldTargCheck && comp.PrimaryWeapon.Target.TargetObject == oldTarg)
+                                comp.PrimaryWeapon.Target.Reset(Session.I.Tick, Target.States.Expired, true);
+                        }
+                    }
+                }
+            }
+
+            internal void ConstructKeenDroneCombatDirty(MyCubeBlock block)
+            {
+                if (block.IsWorking && !block.MarkedForClose)
+                {
+                    ActiveCombatBlock = block as IMyOffensiveCombatBlock;
+                }
+            }
+
+            internal void ConstructKeenDroneFlightDirty(MyCubeBlock block)
+            {               
+                if (block.IsWorking && !block.MarkedForClose)
+                {
+                    ActiveFlightBlock = block as IMyFlightMovementBlock;
+                }
             }
 
             internal void Refresh()
@@ -258,6 +316,7 @@ namespace CoreSystems.Support
                     {
                         foreach (var sub in Ai.SubGridCache)
                             Session.I.EntityToMasterAi[sub] = RootAi;
+                            KeenDroneDirty = true;
                     }
                 }
             }
@@ -334,6 +393,71 @@ namespace CoreSystems.Support
                 if (rootAi != null)
                     rootAi.Construct.DirtyWeaponGroups = true;
             }
+            internal static void KeenDroneDirtyUpdate(Ai cAi)
+            {
+                if (cAi.AiFlight != null)
+                {
+                    foreach (IMyFlightMovementBlock flight in cAi.AiFlight)
+                    {
+                        if (flight.IsWorking && !flight.MarkedForClose)
+                            cAi.Construct.ActiveFlightBlock = flight;
+                    }
+                }
+
+                if (cAi.AiOffense != null)
+                {
+                    foreach (IMyOffensiveCombatBlock combat in cAi.AiOffense)
+                    {
+                        if (combat.IsWorking && !combat.MarkedForClose)
+                            cAi.Construct.ActiveCombatBlock = combat;
+                    }
+                }
+
+                cAi.Construct.KeenDroneDirty = false;
+            }
+
+            internal static void CombatBlockUpdates(Ai cAi)//Obligatory comment to annoy comment haters
+            {                            
+                var ais = cAi.TopEntityMap.GroupMap.Ais;
+                for (int i = 0; i < ais.Count; i++)
+                {
+                    var checkAi = ais[i];
+                    checkAi.Construct.Counter.Clear();
+                    var aCB = checkAi.Construct.ActiveCombatBlock;
+                    var aFB = checkAi.Construct.ActiveFlightBlock;
+                    var stopFiring = !aCB.IsWorking || aCB.MarkedForClose || !aFB.IsWorking || aFB.MarkedForClose;
+                    var alignedShoot = false;
+                    double rangeToTarg = double.MaxValue;
+                    var currentAim = aFB.LookAtPosition == null ? Vector3D.Zero : (Vector3D)aFB.LookAtPosition;
+                    var hasTarg = aCB.SearchEnemyComponent.FoundEnemy != null;
+                    var targSphere = new BoundingSphereD(hasTarg ? aCB.SearchEnemyComponent.FoundEnemy.PositionComp.WorldAABB.Center : Vector3D.Zero, 1); //Does the radius really matter here?  use actual enemy or lead position?
+
+                    if (currentAim != Vector3D.Zero && !stopFiring)
+                    {
+                        //Lead stuff, if any, ought to be done here by setting aFB.LookAtPosition
+                        alignedShoot = Vector3D.Dot(Vector3D.Normalize(currentAim - aFB.WorldVolume.Center), aFB.WorldMatrix.Forward) >= 0.9999f; //Magic var shoot tolerance, approx 0.8 degrees   
+                        rangeToTarg = Vector3D.Distance(currentAim, aFB.CubeGrid.PositionComp.WorldVolume.Center);
+                    }
+
+                    for (int x = 0; x < ais.Count; x++)
+                    {
+                        foreach (var comp in ais[x].WeaponComps)
+                        {
+                            if (comp.HasTurret || comp.HasScanTrackOnly) continue;
+
+                            var smartAligned = hasTarg && comp.HasGuidance && MathFuncs.TargetSphereInCone(ref targSphere, ref comp.PrimaryWeapon.AimCone);
+
+                            if ((alignedShoot || smartAligned) && comp.Data.Repo.Values.State.Trigger == CoreComponent.Trigger.Off && rangeToTarg <= comp.PrimaryWeapon.MaxTargetDistance)                           
+                                comp.ShootManager.RequestShootSync(0, Weapon.ShootManager.RequestType.On);
+                            else if (comp.Data.Repo.Values.State.Trigger == CoreComponent.Trigger.On)
+                                comp.ShootManager.RequestShootSync(0, Weapon.ShootManager.RequestType.Off);
+                        }
+                    }
+                    if (aCB.MarkedForClose) checkAi.Construct.ActiveCombatBlock = null;
+                    if (aFB.MarkedForClose) checkAi.Construct.ActiveFlightBlock = null; //Placed these removals here so we can flip triggers "off" the last time the method runs
+                }
+            }
+
 
             internal static void RebuildWeaponGroups(GridGroupMap map)
             {
@@ -739,6 +863,9 @@ namespace CoreSystems.Support
                 LargestAi = null;
                 LastFocusEntity = null;
                 LastFocusEntityChecked = null;
+                ActiveCombatBlock = null;
+                ActiveFlightBlock = null;
+                KeenDroneDirty = false;
                 Counter.Clear();
                 PreviousTargets.Clear();
                 ControllingPlayers.Clear();

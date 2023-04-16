@@ -38,7 +38,15 @@ namespace CoreSystems.Platform
                 }
             }
             else if (ElevationTick == Session.I.Tick || AzimuthTick == Session.I.Tick)
-                Comp.VanillaTurretBase.SetManualAzimuthAndElevation((float)Azimuth, (float)Elevation);
+            {
+                if (Comp.TypeSpecific == CompTypeSpecific.VanillaTurret)
+                    Comp.VanillaTurretBase.SetManualAzimuthAndElevation((float)Azimuth, (float)Elevation);
+                else if (Comp.TypeSpecific == CompTypeSpecific.SearchLight) //Is this If needed?  just an else?
+                {
+                    var search = Comp.TerminalBlock as Sandbox.ModAPI.IMySearchlight;
+                    search.SetManualAzimuthAndElevation((float)Azimuth, (float)Elevation);
+                }
+            }
         }
 
         public void ScheduleWeaponHome(bool sendNow = false)

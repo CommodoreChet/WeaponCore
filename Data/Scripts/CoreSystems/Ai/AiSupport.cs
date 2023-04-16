@@ -492,6 +492,8 @@ namespace CoreSystems.Support
             CompBase.Clear();
             Stators.Clear();
             Tools.Clear();
+            AiOffense.Clear();
+            AiFlight.Clear();
             QueuedSounds.Clear();
             ProjetileCache.Clear();
             CompWeaponGroups.Clear();

@@ -94,6 +94,7 @@ namespace CoreSystems.Support
         internal bool CanOverload;
         internal bool HasTurret;
         internal bool TurretController;
+        internal bool CTCSunTracking;
         internal bool HasArming;
         internal bool IsBomb;
         internal bool OverrideLeads;
@@ -143,6 +144,7 @@ namespace CoreSystems.Support
             Phantom,
             Rifle,
             Control,
+            SearchLight,
         }
 
         internal enum CompType
@@ -205,6 +207,11 @@ namespace CoreSystems.Support
                 else if (CoreEntity is IMyTurretControlBlock) {
                     TypeSpecific = CompTypeSpecific.Control;
                     Type = CompType.Control;
+                }
+                else if (CoreEntity is IMySearchlight)
+                {
+                    TypeSpecific = CompTypeSpecific.SearchLight;
+                    Type = CompType.Weapon;
                 }
                 else {
                     TypeSpecific = CompTypeSpecific.VanillaFixed;

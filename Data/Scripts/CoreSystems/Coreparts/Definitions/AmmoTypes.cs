@@ -30,6 +30,19 @@ namespace Scripts
 { // Don't edit above this line
     partial class Parts
     {
+        private AmmoDef SpotLight => new AmmoDef
+        {
+            AmmoMagazine = "Energy",
+            AmmoRound = "SpotLight",
+            BaseDamage = 0,
+            NoGridOrArmorScaling = true,
+            Trajectory = new TrajectoryDef
+            {
+                MaxLifeTime = 3600,
+                MaxTrajectory = 3000,
+                DesiredSpeed = 1000,
+            },
+        };
         private AmmoDef GatlingAmmo => new AmmoDef // Your ID, for slotting into the Weapon CS
         {
             AmmoMagazine = "NATO_25x184mm", // SubtypeId of physical ammo magazine. Use "Energy" for weapons without physical ammo.
