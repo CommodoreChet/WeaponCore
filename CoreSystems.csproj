@@ -98,6 +98,7 @@
     <Compile Include="Data\Scripts\CoreSystems\Coreparts\Definitions\Missiles.cs" />
     <Compile Include="Data\Scripts\CoreSystems\Coreparts\Definitions\RailgunAnimations.cs" />
     <Compile Include="Data\Scripts\CoreSystems\Coreparts\Definitions\Railguns.cs" />
+    <Compile Include="Data\Scripts\CoreSystems\Coreparts\Definitions\SearchLight.cs" />
     <Compile Include="Data\Scripts\CoreSystems\Definitions\CoreSystems.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>

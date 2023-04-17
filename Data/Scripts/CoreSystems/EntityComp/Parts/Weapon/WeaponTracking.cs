@@ -95,8 +95,13 @@ namespace CoreSystems.Platform
             if (weapon.PosChangedTick != Session.I.SimulationCount)
                 weapon.UpdatePivotPos();
 
-            var vel = target.Physics.LinearVelocity;
-            var accel = target.Physics.LinearAcceleration;
+            var vel = Vector3.Zero;
+            var accel = Vector3.Zero;
+            if(target.Physics != null)
+            {
+                vel = target.Physics.LinearVelocity;
+                accel = target.Physics.LinearAcceleration;
+            }
             var trackingWeapon = weapon.TurretController || weapon.Comp.PrimaryWeapon == null ? weapon : weapon.Comp.PrimaryWeapon;
 
             var box = target.PositionComp.LocalAABB;

@@ -1635,6 +1635,11 @@ namespace CoreSystems
             }
 
             CalculateRestrictedShapes(subtype, cubeBoundingBox, out restrictedBox, out restrictedSphere);
+            AreaRestriction restriction;
+            if (AreaRestrictions.ContainsKey(subtype))
+                restriction = AreaRestrictions[subtype];
+            else
+                return false;
             var queryRadius = Math.Max(restrictedBox.HalfExtent.AbsMax(), restrictedSphere.Radius);
             foreach (KeyValuePair<MyStringHash, AreaRestriction> otherRestrictions in AreaRestrictions)
             {
@@ -1645,7 +1650,6 @@ namespace CoreSystems
             if (queryRadius < 0.01)
                 return false;
             
-            var restriction = AreaRestrictions[subtype];
             var checkBox = restriction.RestrictionBoxInflation > 0;
             var checkSphere = restriction.RestrictionRadius > 0;
             var querySphere = new BoundingSphereD(cubeBoundingBox.Center, queryRadius);

@@ -4,15 +4,15 @@ using CoreSystems.Platform;
 using CoreSystems.Projectiles;
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
-using SpaceEngineers.Game.EntityComponents.Blocks;
 using VRage.Game;
-using VRage.Game.Components;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
 using VRage.ModAPI;
 using VRage.Utils;
 using VRageMath;
 using static CoreSystems.FocusData;
+using static CoreSystems.Platform.Weapon;
+using static CoreSystems.Platform.Weapon.ApiShootRequest;
 
 namespace CoreSystems.Support
 {
@@ -434,7 +434,6 @@ namespace CoreSystems.Support
 
                     if (currentAim != Vector3D.Zero && !stopFiring)
                     {
-                        //Lead stuff, if any, ought to be done here by setting aFB.LookAtPosition
                         alignedShoot = Vector3D.Dot(Vector3D.Normalize(currentAim - aFB.WorldVolume.Center), aFB.WorldMatrix.Forward) >= 0.9999f; //Magic var shoot tolerance, approx 0.8 degrees   
                         rangeToTarg = Vector3D.Distance(currentAim, aFB.CubeGrid.PositionComp.WorldVolume.Center);
                     }
@@ -445,12 +444,29 @@ namespace CoreSystems.Support
                         {
                             if (comp.HasTurret || comp.HasScanTrackOnly) continue;
 
-                            var smartAligned = hasTarg && comp.HasGuidance && MathFuncs.TargetSphereInCone(ref targSphere, ref comp.PrimaryWeapon.AimCone);
+                            if (comp.HasGuidance)
+                            {
+                                if (hasTarg && comp.Data.Repo.Values.State.Trigger == CoreComponent.Trigger.Off && rangeToTarg <= comp.PrimaryWeapon.MaxTargetDistance && MathFuncs.TargetSphereInCone(ref targSphere, ref comp.PrimaryWeapon.AimCone))
+                                    comp.ShootManager.RequestShootSync(0, ShootManager.RequestType.On);
+                                else if (comp.Data.Repo.Values.State.Trigger == CoreComponent.Trigger.On)
+                                    comp.ShootManager.RequestShootSync(0, ShootManager.RequestType.Off);
+                            }
+                            else if (alignedShoot && hasTarg && comp.Data.Repo.Values.State.Trigger == CoreComponent.Trigger.Off && rangeToTarg <= comp.PrimaryWeapon.MaxTargetDistance)
+                            {
+                                Vector3D leadPos = Vector3D.Zero;
+                                bool couldHit = false;
+                                bool willHit = false;
+                                LeadTarget(comp.PrimaryWeapon, (MyEntity)aCB.SearchEnemyComponent.FoundEnemy, out leadPos, out couldHit, out willHit);
 
-                            if ((alignedShoot || smartAligned) && comp.Data.Repo.Values.State.Trigger == CoreComponent.Trigger.Off && rangeToTarg <= comp.PrimaryWeapon.MaxTargetDistance)                           
-                                comp.ShootManager.RequestShootSync(0, Weapon.ShootManager.RequestType.On);
+                                comp.PrimaryWeapon.ShootRequest.Position = leadPos;
+                                comp.PrimaryWeapon.ShootRequest.Type = TargetType.Position;
+                                comp.ShootManager.RequestShootSync(0, ShootManager.RequestType.On);
+                            }
                             else if (comp.Data.Repo.Values.State.Trigger == CoreComponent.Trigger.On)
-                                comp.ShootManager.RequestShootSync(0, Weapon.ShootManager.RequestType.Off);
+                            {
+                                comp.PrimaryWeapon.ShootRequest.Type = TargetType.None; //Just in case?
+                                comp.ShootManager.RequestShootSync(0, ShootManager.RequestType.Off);
+                            }
                         }
                     }
                     if (aCB.MarkedForClose) checkAi.Construct.ActiveCombatBlock = null;
