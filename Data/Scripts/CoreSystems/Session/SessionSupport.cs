@@ -1636,6 +1636,12 @@ namespace CoreSystems
 
             CalculateRestrictedShapes(subtype, cubeBoundingBox, out restrictedBox, out restrictedSphere);
             var queryRadius = Math.Max(restrictedBox.HalfExtent.AbsMax(), restrictedSphere.Radius);
+            foreach (KeyValuePair<MyStringHash, AreaRestriction> otherRestrictions in AreaRestrictions)
+            {
+                if (otherRestrictions.Value.MaxSize > queryRadius)
+                    queryRadius = otherRestrictions.Value.MaxSize;
+            }
+            
             if (queryRadius < 0.01)
                 return false;
             
@@ -1657,12 +1663,35 @@ namespace CoreSystems
                 var cube = _tmpNearByBlocks[l] as MyCubeBlock;
                 if (cube == null || cube.EntityId == ignoredEntity || !CoreSystemsDefs.ContainsKey(cube.BlockDefinition.Id.SubtypeId.String))
                     continue;
+                var cubeSubtype = cube.BlockDefinition.Id.SubtypeId;
+                var cubeBox = new MyOrientedBoundingBoxD(cube.PositionComp.LocalAABB, cube.PositionComp.WorldMatrixRef);
+
+
+                if (AreaRestrictions.ContainsKey(cubeSubtype))
+                {
+                    AreaRestriction localrestriction = AreaRestrictions[cubeSubtype];
+                    if(localrestriction.CheckForAnyPart)
+                    {
+                        var localrestrictedSphere = new BoundingSphereD();
+                        var localrestrictedBox = new MyOrientedBoundingBoxD();
+                        CalculateRestrictedShapes(cubeSubtype, cubeBox, out localrestrictedBox, out localrestrictedSphere);
+                        var localcheckBox = restriction.RestrictionBoxInflation > 0;
+                        var localcheckSphere = restriction.RestrictionRadius > 0;
+                        var originalCubeBounds = new BoundingBoxD(cubeBoundingBox.Center - cubeBoundingBox.HalfExtent, cubeBoundingBox.Center + cubeBoundingBox.HalfExtent);
+                        if (localcheckBox)
+                        {
+                            if (localrestrictedBox.Contains(ref cubeBoundingBox) != ContainmentType.Disjoint)
+                                return true;
+                        }
+                        if (localcheckSphere && localrestrictedSphere.Contains(originalCubeBounds) != ContainmentType.Disjoint)
+                            return true;
+                    }
+                }
 
                 if (!restriction.CheckForAnyPart && cube.BlockDefinition.Id.SubtypeId != subtype)
                     continue;
 
                 if (checkBox) {
-                    var cubeBox = new MyOrientedBoundingBoxD(cube.PositionComp.LocalAABB, cube.PositionComp.WorldMatrixRef);
                     if (restrictedBox.Contains(ref cubeBox) != ContainmentType.Disjoint)
                         return true;
                 }

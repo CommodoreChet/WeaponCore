@@ -56,6 +56,8 @@ namespace CoreSystems
                 var camera = cube as MyCameraBlock;
                 var turretController = cube as IMyTurretControlBlock;
                 var searchLight = cube as IMySearchlight;
+                var flight = cube as IMyFlightMovementBlock;
+                var combat = cube as IMyOffensiveCombatBlock;
 
                 if (sorter != null || turret != null || controllableGun != null || rifle != null || turretController != null || searchLight != null)
                 {
@@ -147,6 +149,17 @@ namespace CoreSystems
 
                     cube.AddedToScene += CameraAddedToScene;
                     cube.OnClose += CameraOnClose;
+                }
+                else if (flight !=null)
+                {
+                    flight.IsWorkingChanged += FlightBlockDirty;
+                    cube.OnClose += FlightBlockOnClose;
+                }
+                else if (combat != null)
+                {
+                    combat.OnTargetChanged += CombatBlockTargetDirty;
+                    combat.IsWorkingChanged += CombatBlockDirty;
+                    cube.OnClose += CombatBlockOnClose;
                 }
             }
             catch (Exception ex) { Log.Line($"Exception in OnEntityCreate: {ex}", null, true); }
@@ -253,6 +266,21 @@ namespace CoreSystems
             myEntity.AddedToScene -= CameraAddedToScene;
         }
 
+        private void FlightBlockOnClose(MyEntity myEntity)
+        {
+            myEntity.OnClose -= FlightBlockOnClose;
+            var flight = myEntity as IMyFlightMovementBlock;
+            flight.IsWorkingChanged -= FlightBlockDirty;
+        }
+
+        private void CombatBlockOnClose(MyEntity myEntity)
+        {
+            myEntity.OnClose -= CombatBlockOnClose;
+            var combat = myEntity as IMyOffensiveCombatBlock;
+            combat.IsWorkingChanged -= CombatBlockDirty;
+            combat.OnTargetChanged -= CombatBlockTargetDirty;
+        }
+
         private void DecoyOnClose(MyEntity myEntity)
         {
             myEntity.OnClose -= DecoyOnClose;
@@ -308,17 +336,6 @@ namespace CoreSystems
                             if (term == null) continue;
 
                             allFat.Add(gridFat[i]);
-
-                            var flight = gridFat[i] as IMyFlightMovementBlock;
-                            var offense = gridFat[i] as IMyOffensiveCombatBlock;
-                            if (flight != null)
-                                flight.IsWorkingChanged += FlightBlockDirty;
-
-                            if (offense != null)
-                            {
-                                offense.OnTargetChanged += CombatBlockTargetDirty;
-                                offense.IsWorkingChanged += CombatBlockDirty;
-                            }
                         }
                         allFat.ApplyAdditions();
 
@@ -366,22 +383,6 @@ namespace CoreSystems
                     ConcurrentListPool.Return(topMap.MyCubeBocks);
                     grid.OnFatBlockAdded -= ToGridMap;
                     grid.OnFatBlockRemoved -= FromGridMap;
-
-                    var gridFat = grid.GetFatBlocks();
-                    for (int i = 0; i < gridFat.Count; i++)
-                    {
-                        var cube = gridFat[i];
-                        if (!(cube is IMyTerminalBlock)) continue;
-                        var flight = cube as IMyFlightMovementBlock;
-                        var offense = cube as IMyOffensiveCombatBlock;
-                        if (flight != null)
-                            flight.IsWorkingChanged -= FlightBlockDirty;
-                        if (offense != null)
-                        {
-                            offense.OnTargetChanged -= CombatBlockTargetDirty;
-                            offense.IsWorkingChanged -= CombatBlockDirty;
-                        }
-                    }
                 }
 
                 topMap.GroupMap = null;
@@ -423,17 +424,6 @@ namespace CoreSystems
                 if (term != null && TopEntityToInfoMap.TryGetValue(myCubeBlock.CubeGrid, out topMap))
                 {
                     topMap.MyCubeBocks.Add(myCubeBlock);
-
-                    var flight = myCubeBlock as IMyFlightMovementBlock;
-                    var offense = myCubeBlock as IMyOffensiveCombatBlock;
-                    if (flight != null)
-                        flight.IsWorkingChanged += FlightBlockDirty;
-                    if (offense != null)
-                    {
-                        offense.OnTargetChanged += CombatBlockTargetDirty;
-                        offense.IsWorkingChanged += CombatBlockDirty;
-                    }
-
                     using (_dityGridLock.Acquire())
                     {
                         DirtyGridInfos.Add(myCubeBlock.CubeGrid);
@@ -455,17 +445,6 @@ namespace CoreSystems
                 if (term != null && TopEntityToInfoMap.TryGetValue(myCubeBlock.CubeGrid, out topMap))
                 {
                     topMap.MyCubeBocks.Remove(myCubeBlock);
-
-                    var flight = myCubeBlock as IMyFlightMovementBlock;
-                    var offense = myCubeBlock as IMyOffensiveCombatBlock;
-                    if (flight != null) 
-                        flight.IsWorkingChanged -= FlightBlockDirty;
-                    if (offense != null)
-                    {
-                        offense.OnTargetChanged -= CombatBlockTargetDirty;
-                        offense.IsWorkingChanged -= CombatBlockDirty;
-                    }
-
                     using (_dityGridLock.Acquire())
                     {
                         DirtyGridInfos.Add(myCubeBlock.CubeGrid);

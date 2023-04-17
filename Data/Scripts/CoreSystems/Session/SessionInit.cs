@@ -351,15 +351,16 @@ namespace CoreSystems
                                         if (partDef.HardPoint.Other.CheckInflatedBox)
                                         {
                                             if (areaRestriction.RestrictionBoxInflation < partDef.HardPoint.Other.RestrictionRadius)
-                                            {
                                                 areaRestriction.RestrictionBoxInflation = partDef.HardPoint.Other.RestrictionRadius;
-                                            }
                                         }
                                         else
                                         {
 
                                             if (areaRestriction.RestrictionRadius < partDef.HardPoint.Other.RestrictionRadius)
+                                            {
                                                 areaRestriction.RestrictionRadius = partDef.HardPoint.Other.RestrictionRadius;
+                                                areaRestriction.MaxSize = areaRestriction.RestrictionRadius;
+                                            }
                                         }
                                     }
                                     CoreSystemsDefs[subTypeMap.Key] = def.Id;
@@ -435,6 +436,8 @@ namespace CoreSystems
                                             var cubeDef = def as MyCubeBlockDefinition;
                                             if (cubeDef != null)
                                             {
+                                                if (areaRestriction.RestrictionBoxInflation > 0)
+                                                    areaRestriction.MaxSize = cubeDef.Size.AbsMax() + areaRestriction.RestrictionBoxInflation;
                                                 for (int x = 0; x < partDef.Assignments.MountPoints.Length; x++)
                                                 {
                                                     var mp = partDef.Assignments.MountPoints[x];
