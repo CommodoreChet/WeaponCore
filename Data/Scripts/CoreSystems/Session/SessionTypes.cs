@@ -946,6 +946,7 @@ namespace CoreSystems
 
         public class AreaRestriction
         {
+            public double MaxSize = 0;
             public double RestrictionRadius = 0;
             public double RestrictionBoxInflation = 0;
             public bool CheckForAnyPart = false;
