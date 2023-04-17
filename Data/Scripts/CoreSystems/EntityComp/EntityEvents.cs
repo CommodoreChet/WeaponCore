@@ -47,7 +47,7 @@ namespace CoreSystems.Support
 
                     if (CoreInventory == null)
                     {
-                        if (TypeSpecific != CompTypeSpecific.Phantom && TypeSpecific != CompTypeSpecific.Control && !IsBomb)
+                        if (TypeSpecific != CompTypeSpecific.Phantom && TypeSpecific != CompTypeSpecific.Control && TypeSpecific != CompTypeSpecific.SearchLight && !IsBomb)
                             Log.Line("BlockInventory is null");
                     }
                     else
@@ -95,7 +95,7 @@ namespace CoreSystems.Support
 
                         if (CoreInventory == null)
                         {
-                            if ((TypeSpecific != CompTypeSpecific.Control && TypeSpecific != CompTypeSpecific.Phantom) && !IsBomb)
+                            if (TypeSpecific != CompTypeSpecific.Control && TypeSpecific != CompTypeSpecific.Phantom && TypeSpecific != CompTypeSpecific.SearchLight && !IsBomb)
                                 Log.Line("BlockInventory is null");
                         }
                         else

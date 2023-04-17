@@ -393,6 +393,7 @@ namespace CoreSystems
                             var upgrade = fat as IMyUpgradeModule;
                             var remoteControl = fat as MyRemoteControl;
                             var programBlock = fat as IMyProgrammableBlock;
+                            var flightAi = fat as IMyFlightMovementBlock;
 
                             if (programBlock != null)
                                 ++program;
@@ -424,11 +425,13 @@ namespace CoreSystems
 
                                 newTypeMap[Offense].Add(fat);
                             }
-                            else if (upgrade != null || fat is IMyRadioAntenna || fat is IMyLaserAntenna || remoteControl != null || fat is IMyShipToolBase || fat is IMyMedicalRoom || fat is IMyCameraBlock)
+                            else if (upgrade != null || fat is IMyRadioAntenna || fat is IMyLaserAntenna || remoteControl != null || fat is IMyShipToolBase || fat is IMyMedicalRoom || fat is IMyCameraBlock || flightAi != null)
                             {
                                 if (remoteControl != null)
                                     ++remote;
 
+                                if (flightAi != null)
+                                    ++remote;
                                 newTypeMap[Utility].Add(fat);
                             }
                             else if (fat is MyThrust)

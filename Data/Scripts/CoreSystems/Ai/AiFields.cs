@@ -55,6 +55,8 @@ namespace CoreSystems.Support
         internal readonly HashSet<MyCubeGrid> SubGridCache = new HashSet<MyCubeGrid>();
         internal readonly HashSet<Projectile> LiveProjectile = new HashSet<Projectile>();
         internal readonly HashSet<IMyMotorStator> Stators = new HashSet<IMyMotorStator>();
+        internal readonly HashSet<IMyOffensiveCombatBlock> AiOffense = new HashSet<IMyOffensiveCombatBlock>();
+        internal readonly HashSet<IMyFlightMovementBlock> AiFlight = new HashSet<IMyFlightMovementBlock>();
         internal readonly HashSet<IMyShipToolBase> Tools = new HashSet<IMyShipToolBase>();
         internal readonly ConcurrentDictionary<MyCubeGrid, byte> SubGridsRegistered = new ConcurrentDictionary<MyCubeGrid, byte>();
 

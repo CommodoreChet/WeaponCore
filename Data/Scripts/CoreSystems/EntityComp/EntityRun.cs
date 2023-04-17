@@ -86,7 +86,7 @@ namespace CoreSystems.Support
 
                     StorageSetup();
 
-                    if (TypeSpecific != CompTypeSpecific.Phantom && TypeSpecific != CompTypeSpecific.Control) {
+                    if (TypeSpecific != CompTypeSpecific.Phantom && TypeSpecific != CompTypeSpecific.Control && TypeSpecific != CompTypeSpecific.SearchLight) {
                         InventoryInit();
 
                         if (IsBlock)
@@ -203,8 +203,10 @@ namespace CoreSystems.Support
                             var cubeBlock = fatList[i];
                             var stator = cubeBlock as IMyMotorStator;
                             var tool = cubeBlock as IMyShipToolBase;
+                            var offense = cubeBlock as IMyOffensiveCombatBlock;
+                            var flight = cubeBlock as IMyFlightMovementBlock;
 
-                            if (cubeBlock is MyBatteryBlock || cubeBlock.HasInventory || stator != null || tool != null)
+                            if (cubeBlock is MyBatteryBlock || cubeBlock.HasInventory || stator != null || tool != null || offense != null || flight != null)
                                 Ai.FatBlockAdded(cubeBlock);
                         }
                         var bigOwners = Ai.GridEntity.BigOwners;

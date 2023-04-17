@@ -55,7 +55,9 @@ namespace CoreSystems
                 var decoy = cube as IMyDecoy;
                 var camera = cube as MyCameraBlock;
                 var turretController = cube as IMyTurretControlBlock;
-                if (sorter != null || turret != null || controllableGun != null || rifle != null || turretController != null)
+                var searchLight = cube as IMySearchlight;
+
+                if (sorter != null || turret != null || controllableGun != null || rifle != null || turretController != null || searchLight != null)
                 {
                     lock (InitObj)
                     {
@@ -110,8 +112,13 @@ namespace CoreSystems
                             MyAPIGateway.Utilities.InvokeOnGameThread(() => CreateTerminalUi<IMyTurretControlBlock>(this));
                             TurretControllerControls = true;
                             if (!EarlyInitOver) ControlQueue.Enqueue(typeof(IMyTurretControlBlock));
+                        }                       
+                        else if (searchLight != null)
+                        {
+                            MyAPIGateway.Utilities.InvokeOnGameThread(() => CreateTerminalUi<IMySearchlight>(this));
+                            TurretControls = true;
+                            if (!EarlyInitOver) ControlQueue.Enqueue(typeof(IMySearchlight));
                         }
-
                     }
 
                     var def = cube?.BlockDefinition.Id ?? entity.DefinitionId;
@@ -301,6 +308,17 @@ namespace CoreSystems
                             if (term == null) continue;
 
                             allFat.Add(gridFat[i]);
+
+                            var flight = gridFat[i] as IMyFlightMovementBlock;
+                            var offense = gridFat[i] as IMyOffensiveCombatBlock;
+                            if (flight != null)
+                                flight.IsWorkingChanged += FlightBlockDirty;
+
+                            if (offense != null)
+                            {
+                                offense.OnTargetChanged += CombatBlockTargetDirty;
+                                offense.IsWorkingChanged += CombatBlockDirty;
+                            }
                         }
                         allFat.ApplyAdditions();
 
@@ -348,6 +366,22 @@ namespace CoreSystems
                     ConcurrentListPool.Return(topMap.MyCubeBocks);
                     grid.OnFatBlockAdded -= ToGridMap;
                     grid.OnFatBlockRemoved -= FromGridMap;
+
+                    var gridFat = grid.GetFatBlocks();
+                    for (int i = 0; i < gridFat.Count; i++)
+                    {
+                        var cube = gridFat[i];
+                        if (!(cube is IMyTerminalBlock)) continue;
+                        var flight = cube as IMyFlightMovementBlock;
+                        var offense = cube as IMyOffensiveCombatBlock;
+                        if (flight != null)
+                            flight.IsWorkingChanged -= FlightBlockDirty;
+                        if (offense != null)
+                        {
+                            offense.OnTargetChanged -= CombatBlockTargetDirty;
+                            offense.IsWorkingChanged -= CombatBlockDirty;
+                        }
+                    }
                 }
 
                 topMap.GroupMap = null;
@@ -389,6 +423,17 @@ namespace CoreSystems
                 if (term != null && TopEntityToInfoMap.TryGetValue(myCubeBlock.CubeGrid, out topMap))
                 {
                     topMap.MyCubeBocks.Add(myCubeBlock);
+
+                    var flight = myCubeBlock as IMyFlightMovementBlock;
+                    var offense = myCubeBlock as IMyOffensiveCombatBlock;
+                    if (flight != null)
+                        flight.IsWorkingChanged += FlightBlockDirty;
+                    if (offense != null)
+                    {
+                        offense.OnTargetChanged += CombatBlockTargetDirty;
+                        offense.IsWorkingChanged += CombatBlockDirty;
+                    }
+
                     using (_dityGridLock.Acquire())
                     {
                         DirtyGridInfos.Add(myCubeBlock.CubeGrid);
@@ -411,6 +456,16 @@ namespace CoreSystems
                 {
                     topMap.MyCubeBocks.Remove(myCubeBlock);
 
+                    var flight = myCubeBlock as IMyFlightMovementBlock;
+                    var offense = myCubeBlock as IMyOffensiveCombatBlock;
+                    if (flight != null) 
+                        flight.IsWorkingChanged -= FlightBlockDirty;
+                    if (offense != null)
+                    {
+                        offense.OnTargetChanged -= CombatBlockTargetDirty;
+                        offense.IsWorkingChanged -= CombatBlockDirty;
+                    }
+
                     using (_dityGridLock.Acquire())
                     {
                         DirtyGridInfos.Add(myCubeBlock.CubeGrid);
@@ -421,7 +476,36 @@ namespace CoreSystems
             }
             catch (Exception ex) { Log.Line($"Exception in FromGridMap: {ex} - marked:{myCubeBlock.MarkedForClose}"); }
         }
-
+        internal void CombatBlockTargetDirty(IMyOffensiveCombatBlock block, VRage.Game.ModAPI.Ingame.IMyEntity oldTarg, VRage.Game.ModAPI.Ingame.IMyEntity newTarg, bool forced)
+        {
+            if (Session.IsServer)
+            {
+                Ai curAi;
+                var cubeBlock = (MyCubeBlock)block;
+                if (EntityToMasterAi.TryGetValue(cubeBlock.CubeGrid, out curAi))
+                    curAi.Construct.ConstructKeenDroneCombatTargetDirty(cubeBlock, (VRage.ModAPI.IMyEntity)newTarg, (VRage.ModAPI.IMyEntity)oldTarg);
+            }
+        }
+        internal void CombatBlockDirty(IMyCubeBlock block)
+        {
+            if (Session.IsServer)
+            {
+                Ai curAi;
+                var cubeBlock = (MyCubeBlock)block;
+                if (EntityToMasterAi.TryGetValue(cubeBlock.CubeGrid, out curAi))
+                    curAi.Construct.ConstructKeenDroneCombatDirty(cubeBlock);
+            }
+        }
+        internal void FlightBlockDirty(IMyCubeBlock block)
+        {
+            if (Session.IsServer)
+            {
+                Ai curAi;
+                var cubeBlock = (MyCubeBlock)block;
+                if (EntityToMasterAi.TryGetValue(cubeBlock.CubeGrid, out curAi))
+                    curAi.Construct.ConstructKeenDroneFlightDirty(cubeBlock);
+            }
+        }
         internal void BeforeDamageHandler(object o, ref MyDamageInformation info)
         {
             var slim = o as IMySlimBlock;

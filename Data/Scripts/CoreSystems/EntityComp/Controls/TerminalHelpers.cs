@@ -150,6 +150,30 @@ namespace CoreSystems.Control
             Separator<T>(session, "WC_sep4", IsTrue);
         }
 
+        internal static void AddSearchlightControls<T>(Session session) where T : IMyTerminalBlock
+        {
+            Separator<T>(session, "WC_sep2", HasTracking);
+
+            AddWeaponRangeSliderNoAction<T>(session, "Weapon Range", Localization.GetText("TerminalWeaponRangeTitle"), Localization.GetText("TerminalWeaponRangeTooltip"), BlockUi.GetRange, BlockUi.RequestSetRange, BlockUi.ShowRange, BlockUi.GetMinRange, BlockUi.GetMaxRange, true, false);
+
+            AddOnOffSwitchNoAction<T>(session, "Neutrals", Localization.GetText("TerminalNeutralsTitle"), Localization.GetText("TerminalNeutralsTooltip"), BlockUi.GetNeutrals, BlockUi.RequestSetNeutrals, true, HasTrackingNeutrals);
+
+            AddOnOffSwitchNoAction<T>(session, "Unowned", Localization.GetText("TerminalUnownedTitle"), Localization.GetText("TerminalUnownedTooltip"), BlockUi.GetUnowned, BlockUi.RequestSetUnowned, true, HasTrackingUnowned);
+
+            //AddOnOffSwitchNoAction<T>(session, "Friendly", Localization.GetText("TerminalFriendlyTitle"), Localization.GetText("TerminalFriendlyTooltip"), BlockUi.GetFriendly, BlockUi.RequestSetFriendly, true, HasTrackingAndTrackFriendly);
+
+            AddOnOffSwitchNoAction<T>(session, "Biologicals", Localization.GetText("TerminalBiologicalsTitle"), Localization.GetText("TerminalBiologicalsTooltip"), BlockUi.GetBiologicals, BlockUi.RequestSetBiologicals, true, TrackBiologicals);
+
+            AddOnOffSwitchNoAction<T>(session, "Projectiles", Localization.GetText("TerminalProjectilesTitle"), Localization.GetText("TerminalProjectilesTooltip"), BlockUi.GetProjectiles, BlockUi.RequestSetProjectiles, true, TrackProjectiles);
+
+            AddOnOffSwitchNoAction<T>(session, "Meteors", Localization.GetText("TerminalMeteorsTitle"), Localization.GetText("TerminalMeteorsTooltip"), BlockUi.GetMeteors, BlockUi.RequestSetMeteors, true, TrackMeteors);
+
+            AddOnOffSwitchNoAction<T>(session, "Grids", Localization.GetText("TerminalGridsTitle"), Localization.GetText("TerminalGridsTooltip"), BlockUi.GetGrids, BlockUi.RequestSetGrids, true, TrackGrids);
+
+            AddOnOffSwitchNoAction<T>(session, "LargeGrid", "Large Grid", "Target large grids", BlockUi.GetLargeGrid, BlockUi.RequestSetLargeGrid, true, HasTracking);
+
+            AddOnOffSwitchNoAction<T>(session, "SmallGrid", "Small Grid", "Target small grids", BlockUi.GetSmallGrid, BlockUi.RequestSetSmallGrid, true, HasTracking);
+        }
         internal static void AddDecoyControls<T>(Session session) where T : IMyTerminalBlock
         {
             Separator<T>(session, "WC_decoySep1", IsTrue);

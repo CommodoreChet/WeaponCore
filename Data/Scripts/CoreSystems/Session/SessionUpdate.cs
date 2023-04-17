@@ -88,8 +88,14 @@ namespace CoreSystems
 
                     if (rootConstruct.DirtyWeaponGroups)
                         Ai.Constructs.RebuildWeaponGroups(rootAi.TopEntityMap.GroupMap);
-                }
 
+                    if (IsServer && rootConstruct.ActiveCombatBlock != null && rootConstruct.ActiveFlightBlock != null)
+                        Ai.Constructs.CombatBlockUpdates(rootAi);
+
+                    if (IsServer && rootConstruct.KeenDroneDirty)
+                        Ai.Constructs.KeenDroneDirtyUpdate(rootAi);
+
+                }
                 if (Tick60 && Tick != rootConstruct.LastEffectUpdateTick && rootConstruct.TotalEffect > rootConstruct.PreviousTotalEffect)
                     rootConstruct.UpdateEffect(Tick);
 
@@ -258,6 +264,9 @@ namespace CoreSystems
 
                         if (ai.DbUpdated || !cComp.UpdatedState)
                             cComp.DetectStateChanges();
+
+                        if (cComp.CTCSunTracking)
+                            continue;
 
                         if (cComp.Platform.State != CorePlatform.PlatformState.Ready || cComp.IsDisabled || cComp.IsAsleep || !cComp.IsWorking || cComp.CoreEntity.MarkedForClose || cComp.LazyUpdate && !ai.DbUpdated && Tick > cComp.NextLazyUpdateStart) {
                             if (cComp.RotorsMoving)

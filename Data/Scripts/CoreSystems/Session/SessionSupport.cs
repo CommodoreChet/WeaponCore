@@ -5,6 +5,7 @@ using CoreSystems.Settings;
 using CoreSystems.Support;
 using ParallelTasks;
 using Sandbox.Common.ObjectBuilders;
+using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.Definitions;
 using Sandbox.Game;
 using Sandbox.Game.Entities;
@@ -1785,6 +1786,12 @@ namespace CoreSystems
             var smallGat2Id = new MyDefinitionId(typeof(MyObjectBuilder_SmallGatlingGun), "SmallGatlingGunWarfare2");
             VanillaIds[smallGat2Id] = smallGat2;
             VanillaCoreIds[smallGat2] = smallGat2Id;
+
+            //BDC Add crap here
+            var largeSearch = MyStringHash.GetOrCompute("LargeSearchlight");
+            var largeSearchId = new MyDefinitionId(typeof(MyObjectBuilder_SearchlightDefinition), "LargeSearchlight");
+            VanillaIds[largeSearchId] = largeSearch;
+            VanillaCoreIds[largeSearch] = largeSearchId;
 
 
             foreach (var pair in VanillaCoreIds)

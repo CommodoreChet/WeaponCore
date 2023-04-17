@@ -40,6 +40,10 @@ namespace CoreSystems
                 {
                     CreateTerminalUi<IMyLargeTurretBase>(session);
                 }
+                else if (controlObject == typeof(IMySearchlight))
+                {
+                    CreateTerminalUi<IMySearchlight>(session);
+                }
                 else if (controlObject == typeof(IMySmallMissileLauncherReload))
                 {
                     CreateTerminalUi<IMySmallMissileLauncherReload>(session);
@@ -67,6 +71,9 @@ namespace CoreSystems
                 return true;
 
             if (typeof(T) == typeof(IMyLargeTurretBase) && session.ControlTypeActivated.Contains(typeof(IMyLargeTurretBase)))
+                return true;
+                            
+            if (typeof(T) == typeof(IMySearchlight) && session.ControlTypeActivated.Contains(typeof(IMySearchlight)))
                 return true;
 
             if (typeof(T) == typeof(IMySmallMissileLauncherReload) && (session.ControlTypeActivated.Contains(typeof(IMySmallMissileLauncherReload))))
@@ -101,6 +108,12 @@ namespace CoreSystems
                 {
                     CreateTurretControllerActions<T>(session);
                     TerminalHelpers.AddTurretControlBlockControls<T>(session);
+                    return;
+                }
+                if (typeof(T) == typeof(IMySearchlight))
+                {
+                    CreateSearchlightActions<T>(session);
+                    TerminalHelpers.AddSearchlightControls<T>(session);
                     return;
                 }
 
@@ -188,6 +201,21 @@ namespace CoreSystems
             CreateCustomActions<T>.CreateMaxSizeControl(session);
             CreateCustomActions<T>.CreateMinSizeControl(session);
             CreateCustomActions<T>.CreateRepelModeControl(session);
+            CreateCustomActions<T>.CreateLargeGridControl(session);
+            CreateCustomActions<T>.CreateSmallGridControl(session);
+        }
+
+        internal static void CreateSearchlightActions<T>(Session session) where T : IMyTerminalBlock
+        {
+            CreateCustomActions<T>.CreateNeutralsControl(session);
+            //CreateCustomActions<T>.CreateFriendlyControl(session); //This even work for a "turret"?
+            CreateCustomActions<T>.CreateUnownedControl(session);
+            CreateCustomActions<T>.CreateProjectilesControl(session);
+            CreateCustomActions<T>.CreateBiologicalsControl(session);
+            CreateCustomActions<T>.CreateMeteorsControl(session);
+            CreateCustomActions<T>.CreateGridsControl(session);
+            CreateCustomActions<T>.CreateMaxSizeControl(session);
+            CreateCustomActions<T>.CreateMinSizeControl(session);
             CreateCustomActions<T>.CreateLargeGridControl(session);
             CreateCustomActions<T>.CreateSmallGridControl(session);
         }
@@ -416,6 +444,14 @@ namespace CoreSystems
                 //"AddSelectedTool",
                 //"SelectedToolsList",
                 //"RemoveSelectedTool",
+                "Color", //Searchlight specific stuff
+                "Radius",
+                "Intensity",
+                "Offset",
+                "Blink Interval",
+                "Blink Lenght", //Spelling error is on the Keen side
+                "Blink Offset",
+                "SunTracking"
 
         };
 
