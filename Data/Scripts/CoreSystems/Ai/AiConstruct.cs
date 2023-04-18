@@ -453,12 +453,7 @@ namespace CoreSystems.Support
                             }
                             else if (alignedShoot && hasTarg && comp.Data.Repo.Values.State.Trigger == CoreComponent.Trigger.Off && rangeToTarg <= comp.PrimaryWeapon.MaxTargetDistance)
                             {
-                                Vector3D leadPos = Vector3D.Zero;
-                                bool couldHit = false;
-                                bool willHit = false;
-                                LeadTarget(comp.PrimaryWeapon, (MyEntity)aCB.SearchEnemyComponent.FoundEnemy, out leadPos, out couldHit, out willHit);
-
-                                comp.PrimaryWeapon.ShootRequest.Position = leadPos;
+                                comp.PrimaryWeapon.ShootRequest.Position = LeadTargetAIBlock(comp.PrimaryWeapon, (MyEntity)aCB.SearchEnemyComponent.FoundEnemy);
                                 comp.PrimaryWeapon.ShootRequest.Type = TargetType.Position;
                                 comp.ShootManager.RequestShootSync(0, ShootManager.RequestType.On);
                             }

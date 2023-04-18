@@ -90,18 +90,34 @@ namespace CoreSystems.Platform
             return !selfHit && (inRange && canTrack || weapon.Comp.Data.Repo.Values.State.TrackingReticle);
         }
 
+
+        internal static Vector3D LeadTargetAIBlock(Weapon weapon, MyEntity target)
+        {
+            var box = target.PositionComp.LocalAABB;
+            var obb = new MyOrientedBoundingBoxD(box, target.PositionComp.WorldMatrixRef);
+            var targetPos = obb.Center;
+            var targParent = target.GetTopMostParent();
+            if (targParent.Physics != null)
+            {
+                var vel = targParent.Physics.LinearVelocity;
+                var accel = targParent.Physics.LinearAcceleration;
+                var validEstimate = true;
+                var advancedMode = weapon.ActiveAmmoDef.AmmoDef.Trajectory.AccelPerSec > 0 || weapon.Comp.Ai.InPlanetGravity && weapon.ActiveAmmoDef.AmmoDef.Const.FeelsGravity;
+                if (!weapon.ActiveAmmoDef.AmmoDef.Const.IsBeamWeapon && weapon.ActiveAmmoDef.AmmoDef.Const.DesiredProjectileSpeed > 0)
+                    targetPos = TrajectoryEstimation(weapon, obb.Center, vel, accel, Vector3D.Zero, out validEstimate, true, advancedMode, weapon.System.Prediction != Prediction.Advanced);
+            }
+            return targetPos;
+        }
+
+
         internal static void LeadTarget(Weapon weapon, MyEntity target, out Vector3D targetPos, out bool couldHit, out bool willHit)
         {
             if (weapon.PosChangedTick != Session.I.SimulationCount)
                 weapon.UpdatePivotPos();
-
-            var vel = Vector3.Zero;
-            var accel = Vector3.Zero;
-            if(target.Physics != null)
-            {
-                vel = target.Physics.LinearVelocity;
-                accel = target.Physics.LinearAcceleration;
-            }
+            
+            var vel = target.Physics.LinearVelocity;
+            var accel = target.Physics.LinearAcceleration;
+            
             var trackingWeapon = weapon.TurretController || weapon.Comp.PrimaryWeapon == null ? weapon : weapon.Comp.PrimaryWeapon;
 
             var box = target.PositionComp.LocalAABB;
