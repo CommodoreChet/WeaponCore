@@ -40,17 +40,6 @@ namespace CoreSystems.Platform
                 if (Platform.State != CorePlatform.PlatformState.Ready)
                     return;
 
-                if (Controller.IsSunTrackerEnabled && !CTCSunTracking)
-                {
-                    RequestSetValue(this, "AiEnabled", 0, 0);
-                    CTCSunTracking = true;
-                }
-                else if (!Controller.IsSunTrackerEnabled || Data.Repo.Values.Set.Overrides.AiEnabled)
-                {
-                    CTCSunTracking = false;
-                    Controller.IsSunTrackerEnabled = false;
-                }
-
                 if (Session.I.Tick - Ai.LastDetectEvent > 59)
                 {
                     if (Data.Repo.Values.Set.Overrides.Projectiles)

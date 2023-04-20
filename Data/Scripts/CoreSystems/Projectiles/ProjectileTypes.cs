@@ -112,7 +112,7 @@ namespace CoreSystems.Support
             Target.Reset(Session.I.Tick, Target.States.ProjectileClean);
             HitList.Clear();
             
-            if (aConst.IsSmart || aConst.IsDrone)
+            if(aConst.IsGuided)
                 Storage.Clean(this);
 
 

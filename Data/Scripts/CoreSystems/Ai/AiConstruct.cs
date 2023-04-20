@@ -457,7 +457,7 @@ namespace CoreSystems.Support
                                 comp.PrimaryWeapon.ShootRequest.Type = TargetType.Position;
                                 comp.ShootManager.RequestShootSync(0, ShootManager.RequestType.On);
                             }
-                            else if (comp.Data.Repo.Values.State.Trigger == CoreComponent.Trigger.On)
+                            else if ((stopFiring || !alignedShoot) && comp.Data.Repo.Values.State.Trigger == CoreComponent.Trigger.On)
                             {
                                 comp.PrimaryWeapon.ShootRequest.Type = TargetType.None; //Just in case?
                                 comp.ShootManager.RequestShootSync(0, ShootManager.RequestType.Off);

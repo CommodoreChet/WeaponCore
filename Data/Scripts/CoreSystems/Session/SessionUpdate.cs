@@ -265,9 +265,6 @@ namespace CoreSystems
                         if (ai.DbUpdated || !cComp.UpdatedState)
                             cComp.DetectStateChanges();
 
-                        if (cComp.CTCSunTracking)
-                            continue;
-
                         if (cComp.Platform.State != CorePlatform.PlatformState.Ready || cComp.IsDisabled || cComp.IsAsleep || !cComp.IsWorking || cComp.CoreEntity.MarkedForClose || cComp.LazyUpdate && !ai.DbUpdated && Tick > cComp.NextLazyUpdateStart) {
                             if (cComp.RotorsMoving)
                                 cComp.StopRotors();
@@ -371,7 +368,7 @@ namespace CoreSystems
                             continue;
                         }
 
-                        if (!cComp.Data.Repo.Values.Set.Overrides.AiEnabled || !cPart.RefreshRootComp()) {
+                        if (!cComp.Data.Repo.Values.Set.Overrides.AiEnabled || cComp.Controller.IsSunTrackerEnabled || !cPart.RefreshRootComp()) {
                             
                             if (cComp.RotorsMoving)
                                 cComp.StopRotors();
