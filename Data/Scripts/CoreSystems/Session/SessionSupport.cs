@@ -1678,8 +1678,8 @@ namespace CoreSystems
                         var localrestrictedSphere = new BoundingSphereD();
                         var localrestrictedBox = new MyOrientedBoundingBoxD();
                         CalculateRestrictedShapes(cubeSubtype, cubeBox, out localrestrictedBox, out localrestrictedSphere);
-                        var localcheckBox = restriction.RestrictionBoxInflation > 0;
-                        var localcheckSphere = restriction.RestrictionRadius > 0;
+                        var localcheckBox = localrestriction.RestrictionBoxInflation > 0;
+                        var localcheckSphere = localrestriction.RestrictionRadius > 0;
                         if (localcheckBox && localrestrictedBox.Contains(ref cubeBoundingBox) != ContainmentType.Disjoint)
                             return true;
                         if (localcheckSphere && cubeBoundingBox.Contains(ref localrestrictedSphere) != ContainmentType.Disjoint)

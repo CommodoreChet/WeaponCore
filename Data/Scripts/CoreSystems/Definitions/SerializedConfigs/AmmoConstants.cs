@@ -284,6 +284,7 @@ namespace CoreSystems.Support
         public readonly bool NoTargetApproach;
         public readonly bool DynamicGuidance;
         public readonly bool TravelTo;
+        public readonly bool IsGuided;
         public readonly bool AdvancedSmartSteering;
         public readonly bool NoSteering;
         public readonly bool Roam;
@@ -439,6 +440,7 @@ namespace CoreSystems.Support
             IsHybrid = ammo.AmmoDef.HybridRound;
             IsDrone = ammo.AmmoDef.Trajectory.Guidance == TrajectoryDef.GuidanceType.DroneAdvanced;
             TravelTo = ammo.AmmoDef.Trajectory.Guidance == TrajectoryDef.GuidanceType.TravelTo;
+            IsGuided = TravelTo || IsMine || IsDrone || IsSmart;
             IsTurretSelectable = !ammo.IsShrapnel && ammo.AmmoDef.HardPointUsable;
 
             ComputeSmarts(ammo, out IsSmart, out Roam, out NoTargetApproach, out AccelClearance, out OverrideTarget, out TargetOffSet,

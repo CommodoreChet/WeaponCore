@@ -255,9 +255,9 @@ namespace CoreSystems.Support
                         .Append($"\n{Localization.GetText("WeaponInfoExplode")}: " + comp.DetDps.ToString("0.0"))
                         .Append("\n")
                         .Append($"\n{Localization.GetText("WeaponTotalEffect")}: " + comp.TotalEffect.ToString("e2"))
-                        .Append($"\n              [ " + Ai.Construct.RootAi?.Construct.TotalEffect.ToString("e2") + " ]")
+                        .Append($"\n               " + Ai.Construct.RootAi?.Construct.TotalEffect.ToString("e2"))
                         .Append($"\n{Localization.GetText("WeaponTotalEffectAvgDps")}: " + comp.AverageEffect.ToString("N0") + " - (" + comp.AddEffect.ToString("N0") + ")")
-                        .Append($"\n             [ " + Ai.Construct.RootAi?.Construct.AverageEffect.ToString("N0") + " - (" + Ai.Construct.RootAi?.Construct.AddEffect.ToString("N0") + ") ]");
+                        .Append($"\n               " + Ai.Construct.RootAi?.Construct.AverageEffect.ToString("N0") + " - (" + Ai.Construct.RootAi?.Construct.AddEffect.ToString("N0") + ")");
                 }
                 else
                 {
@@ -430,19 +430,24 @@ namespace CoreSystems.Support
                 var ai = Platform.Control?.TopAi?.RootComp?.Ai;
                 var initted = ai != null;
 
-                stringBuilder.Append($"Ai Detected:{initted && !Platform.Control.TopAi.RootComp.Ai.MarkedForClose}\n\n");
-
-                if (initted)
+                if (comp.Controller.IsSunTrackerEnabled)
+                    stringBuilder.Append($"Sun Tracking Mode");
+                else
                 {
-                    stringBuilder.Append($"Weapons: {ai.WeaponComps.Count}\nTools: {ai.Tools.Count}\nCamera: {comp.Controller.Camera != null}\n");
-                }
+                    stringBuilder.Append($"Ai Detected:{initted && !Platform.Control.TopAi.RootComp.Ai.MarkedForClose}\n\n");
 
-                if (Debug)
-                {
-                    foreach (var support in Platform.Support)
+                    if (initted)
                     {
-                        stringBuilder.Append($"\n\nPart: {support.CoreSystem.PartName} - Enabled: {IsWorking}");
-                        stringBuilder.Append($"\nManual: {support.BaseComp.UserControlled}");
+                        stringBuilder.Append($"Weapons: {ai.WeaponComps.Count}\nTools: {ai.Tools.Count}\nCamera: {comp.Controller.Camera != null}\n");
+                    }
+
+                    if (Debug)
+                    {
+                        foreach (var support in Platform.Support)
+                        {
+                            stringBuilder.Append($"\n\nPart: {support.CoreSystem.PartName} - Enabled: {IsWorking}");
+                            stringBuilder.Append($"\nManual: {support.BaseComp.UserControlled}");
+                        }
                     }
                 }
             }
