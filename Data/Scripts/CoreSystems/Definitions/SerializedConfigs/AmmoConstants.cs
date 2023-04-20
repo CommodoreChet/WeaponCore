@@ -440,12 +440,13 @@ namespace CoreSystems.Support
             IsHybrid = ammo.AmmoDef.HybridRound;
             IsDrone = ammo.AmmoDef.Trajectory.Guidance == TrajectoryDef.GuidanceType.DroneAdvanced;
             TravelTo = ammo.AmmoDef.Trajectory.Guidance == TrajectoryDef.GuidanceType.TravelTo;
-            IsGuided = TravelTo || IsMine || IsDrone || IsSmart;
             IsTurretSelectable = !ammo.IsShrapnel && ammo.AmmoDef.HardPointUsable;
 
             ComputeSmarts(ammo, out IsSmart, out Roam, out NoTargetApproach, out AccelClearance, out OverrideTarget, out TargetOffSet,
                 out FocusOnly, out FocusEviction, out NoSteering, out AdvancedSmartSteering, out KeepAliveAfterTargetLoss, out NoTargetExpire, out ZeroEffortNav, out ScanRange, out OffsetMinRangeSqr,
                 out Aggressiveness, out NavAcceleration, out MinTurnSpeedSqr, out OffsetRatio, out MaxChaseTime, out MaxTargets, out OffsetTime);
+
+            IsGuided = TravelTo || IsMine || IsDrone || IsSmart;
 
             RequiresTarget = ammo.AmmoDef.Trajectory.Guidance != TrajectoryDef.GuidanceType.None && !OverrideTarget || system.TrackTargets;
 

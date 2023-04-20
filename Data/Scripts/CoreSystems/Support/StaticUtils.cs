@@ -4,6 +4,7 @@ using System.Text;
 using CoreSystems.Projectiles;
 using Sandbox.Game;
 using Sandbox.Game.Entities;
+using Sandbox.Game.Entities.Cube;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces.Terminal;
 using VRage.Game;
@@ -141,6 +142,8 @@ namespace CoreSystems.Support
 
         public static void UpdateTerminal(this MyCubeBlock block)
         {
+            ((IMyTerminalBlock)block).SetDetailedInfoDirty();
+            /*
             try
             {
                 if (block == RefreshToggleCube && RefreshToggle != null)
@@ -156,6 +159,7 @@ namespace CoreSystems.Support
                 RefreshTerminalControls((IMyTerminalBlock)block);
             }
             catch (Exception ex) { Log.Line($"Exception in UpdateTerminal: {ex}"); }
+            */
         }
 
         public static bool GetRefreshToggle()
