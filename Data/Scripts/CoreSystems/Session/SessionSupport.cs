@@ -1640,7 +1640,7 @@ namespace CoreSystems
                 restriction = AreaRestrictions[subtype];
             else
                 return false;
-            var queryRadius = Math.Max(restrictedBox.HalfExtent.AbsMax(), restrictedSphere.Radius);
+            var queryRadius = Math.Max(Math.Max(restrictedBox.HalfExtent.AbsMax(), restrictedSphere.Radius), cubeBoundingBox.HalfExtent.AbsMax());
             foreach (KeyValuePair<MyStringHash, AreaRestriction> otherRestrictions in AreaRestrictions)
             {
                 if (otherRestrictions.Value.MaxSize > queryRadius)
@@ -1670,24 +1670,19 @@ namespace CoreSystems
                 var cubeSubtype = cube.BlockDefinition.Id.SubtypeId;
                 var cubeBox = new MyOrientedBoundingBoxD(cube.PositionComp.LocalAABB, cube.PositionComp.WorldMatrixRef);
 
-
                 if (AreaRestrictions.ContainsKey(cubeSubtype))
                 {
                     AreaRestriction localrestriction = AreaRestrictions[cubeSubtype];
-                    if(localrestriction.CheckForAnyPart)
+                    if(localrestriction.CheckForAnyPart || cube.BlockDefinition.Id.SubtypeId == subtype)
                     {
                         var localrestrictedSphere = new BoundingSphereD();
                         var localrestrictedBox = new MyOrientedBoundingBoxD();
                         CalculateRestrictedShapes(cubeSubtype, cubeBox, out localrestrictedBox, out localrestrictedSphere);
                         var localcheckBox = restriction.RestrictionBoxInflation > 0;
                         var localcheckSphere = restriction.RestrictionRadius > 0;
-                        var originalCubeBounds = new BoundingBoxD(cubeBoundingBox.Center - cubeBoundingBox.HalfExtent, cubeBoundingBox.Center + cubeBoundingBox.HalfExtent);
-                        if (localcheckBox)
-                        {
-                            if (localrestrictedBox.Contains(ref cubeBoundingBox) != ContainmentType.Disjoint)
-                                return true;
-                        }
-                        if (localcheckSphere && localrestrictedSphere.Contains(originalCubeBounds) != ContainmentType.Disjoint)
+                        if (localcheckBox && localrestrictedBox.Contains(ref cubeBoundingBox) != ContainmentType.Disjoint)
+                            return true;
+                        if (localcheckSphere && cubeBoundingBox.Contains(ref localrestrictedSphere) != ContainmentType.Disjoint)
                             return true;
                     }
                 }
@@ -1695,12 +1690,10 @@ namespace CoreSystems
                 if (!restriction.CheckForAnyPart && cube.BlockDefinition.Id.SubtypeId != subtype)
                     continue;
 
-                if (checkBox) {
-                    if (restrictedBox.Contains(ref cubeBox) != ContainmentType.Disjoint)
-                        return true;
-                }
+                if (checkBox && restrictedBox.Contains(ref cubeBox) != ContainmentType.Disjoint)
+                    return true;
 
-                if (checkSphere && restrictedSphere.Contains(cube.PositionComp.WorldAABB) != ContainmentType.Disjoint)                
+                if (checkSphere && cubeBox.Contains(ref restrictedSphere) != ContainmentType.Disjoint)
                     return true;
             }
             return false;
