@@ -351,14 +351,14 @@ namespace CoreSystems
                                         if (partDef.HardPoint.Other.CheckInflatedBox)
                                         {
                                             if (areaRestriction.RestrictionBoxInflation < partDef.HardPoint.Other.RestrictionRadius)
-                                                areaRestriction.RestrictionBoxInflation = partDef.HardPoint.Other.RestrictionRadius;
+                                                areaRestriction.RestrictionBoxInflation = partDef.HardPoint.Other.RestrictionRadius * 0.999;
                                         }
                                         else
                                         {
 
                                             if (areaRestriction.RestrictionRadius < partDef.HardPoint.Other.RestrictionRadius)
                                             {
-                                                areaRestriction.RestrictionRadius = partDef.HardPoint.Other.RestrictionRadius;
+                                                areaRestriction.RestrictionRadius = partDef.HardPoint.Other.RestrictionRadius * 0.999;
                                                 areaRestriction.MaxSize = areaRestriction.RestrictionRadius;
                                             }
                                         }
