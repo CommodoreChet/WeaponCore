@@ -383,7 +383,7 @@ namespace CoreSystems.Projectiles
                             {
                                 var forwardPos = p.Info.Age != 1 ? beamFrom : beamFrom + (direction * Math.Min(grid.GridSizeHalf, info.DistanceTraveled - info.PrevDistanceTraveled));
                                 grid.RayCastCells(forwardPos, p.Beam.To, hitEntity.Vector3ICache, null, true, true);
-
+                                var cacheSlot = 0;
                                 if (hitEntity.Vector3ICache.Count > 0)
                                 {
 
@@ -399,6 +399,7 @@ namespace CoreSystems.Projectiles
                                             {
 
                                                 hitself = true;
+                                                cacheSlot = j;
                                                 break;
                                             }
                                         }
@@ -422,8 +423,8 @@ namespace CoreSystems.Projectiles
                                     }
 
                                     hitEntity.HitPos = hitInfo?.Position ?? beamFrom;
-                                    var posI = hitEntity.Vector3ICache[0];
-                                    var block = grid.GetCubeBlock(hitEntity.Vector3ICache[0]) as IMySlimBlock;
+                                    var posI = hitEntity.Vector3ICache[cacheSlot];
+                                    var block = grid.GetCubeBlock(hitEntity.Vector3ICache[cacheSlot]) as IMySlimBlock;
                                     if (block != null) 
                                         hitEntity.Blocks.Add(new HitEntity.RootBlocks { Block = block, QueryPos = posI });
                                     else {
