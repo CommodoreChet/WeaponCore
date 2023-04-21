@@ -425,6 +425,7 @@ namespace CoreSystems.Support
                     checkAi.Construct.Counter.Clear();
                     var aCB = checkAi.Construct.ActiveCombatBlock;
                     var aFB = checkAi.Construct.ActiveFlightBlock;
+                    if (aCB == null || aFB == null) continue;
                     var stopFiring = !aCB.IsWorking || aCB.MarkedForClose || !aFB.IsWorking || aFB.MarkedForClose;
                     var alignedShoot = false;
                     double rangeToTarg = double.MaxValue;
