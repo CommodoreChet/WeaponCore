@@ -1668,8 +1668,8 @@ namespace CoreSystems
                 if (cube == null || cube.EntityId == ignoredEntity || !CoreSystemsDefs.ContainsKey(cube.BlockDefinition.Id.SubtypeId.String))
                     continue;
                 var cubeSubtype = cube.BlockDefinition.Id.SubtypeId;
-                var cubeBox = new MyOrientedBoundingBoxD(cube.PositionComp.LocalAABB, cube.PositionComp.WorldMatrixRef);
-
+                MyOrientedBoundingBoxD cubeBox;
+                SUtils.GetBlockOrientedBoundingBox(cube, out cubeBox);
                 if (AreaRestrictions.ContainsKey(cubeSubtype))
                 {
                     AreaRestriction localrestriction = AreaRestrictions[cubeSubtype];
