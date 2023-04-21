@@ -299,7 +299,7 @@ namespace CoreSystems.Platform
                             currCube.DecreaseMountLevel(currCube.MaxIntegrity, null, true);
                             currCube.ClearConstructionStockpile(null);
                         }
-                        else if (selfDamage >= currCube.Integrity) Comp.Cube.CubeGrid.RemoveBlock(Comp.Cube.SlimBlock); //Cleaner removal of wep block without a "bang" and deformation of neighbors
+                        else if (selfDamage >= currCube.Integrity) Comp.Cube.CubeGrid.RemoveBlock(Comp.Cube.SlimBlock, true); //Cleaner removal of wep block without a "bang" and deformation of neighbors
                         else currCube.DoDamage(selfDamage, MyDamageType.Grind, true, null, Comp.CoreEntity.EntityId);
                     }
                     else
