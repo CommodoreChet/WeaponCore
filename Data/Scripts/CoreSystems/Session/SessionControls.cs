@@ -158,6 +158,7 @@ namespace CoreSystems
                 if (HideCombatControls.Contains(c.Id))
                 {
                     c.Visible = EmptyBool;
+                    session.AlteredControls.Add(c);
                 }
             }
         }
