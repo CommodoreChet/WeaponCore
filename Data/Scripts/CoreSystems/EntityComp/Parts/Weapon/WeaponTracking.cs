@@ -102,7 +102,7 @@ namespace CoreSystems.Platform
                 var validEstimate = true;
                 var advancedMode = weapon.ActiveAmmoDef.AmmoDef.Trajectory.AccelPerSec > 0 || weapon.Comp.Ai.InPlanetGravity && weapon.ActiveAmmoDef.AmmoDef.Const.FeelsGravity;
                 if (!weapon.ActiveAmmoDef.AmmoDef.Const.IsBeamWeapon && weapon.ActiveAmmoDef.AmmoDef.Const.DesiredProjectileSpeed > 0)
-                    targetPos = TrajectoryEstimation(weapon, targetPos, vel, accel, Vector3D.Zero, out validEstimate, true, advancedMode, weapon.System.Prediction != Prediction.Advanced);
+                    targetPos = TrajectoryEstimation(weapon, targetPos, vel, accel, weapon.Comp.Cube.PositionComp.WorldAABB.Center, out validEstimate, true, advancedMode, weapon.System.Prediction != Prediction.Advanced);
             }
             return targetPos;
         }

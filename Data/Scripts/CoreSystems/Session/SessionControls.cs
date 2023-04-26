@@ -60,6 +60,10 @@ namespace CoreSystems
                 {
                     CreateTerminalUi<IMyTurretControlBlock>(session);
                 }
+                else if (controlObject == typeof(IMyOffensiveCombatBlock))
+                {
+                    CombatBlockUi<IMyOffensiveCombatBlock>(session);
+                }
             }
             session.ControlQueue.Clear();
             session.EarlyInitOver = true;
@@ -86,6 +90,9 @@ namespace CoreSystems
                 return true;
 
             if (typeof(T) == typeof(IMyTurretControlBlock) && session.ControlTypeActivated.Contains(typeof(IMyTurretControlBlock)))
+                return true;
+
+            if (typeof(T) == typeof(IMyOffensiveCombatBlock) && session.ControlTypeActivated.Contains(typeof(IMyOffensiveCombatBlock)))
                 return true;
 
             session.ControlTypeActivated.Add(typeof(T));
@@ -134,6 +141,38 @@ namespace CoreSystems
                 TerminalHelpers.AddTurretOrTrackingControls<T>(session);
             }
             catch (Exception ex) { Log.Line($"Exception in CreateControlUi: {ex}"); }
+        }
+
+        public static void CombatBlockUi<T>(Session session) where T : IMyTerminalBlock
+        {
+            session.MainThreadId = Environment.CurrentManagedThreadId;
+            if (ControlsAlreadyExist<T>(session))
+            {
+                return;
+            }
+            TerminalHelpers.AddOffenseBlockControls<T>(session);
+            List<IMyTerminalControl> controls;
+            MyAPIGateway.TerminalControls.GetControls<T>(out controls);
+            foreach (var c in controls)
+            {
+                if (HideCombatControls.Contains(c.Id))
+                {
+                    c.Visible = EmptyBool;
+                }
+            }
+        }
+
+        private void CombatBlockUiDirty(IMyOffensiveCombatBlock block, long pattern)
+        {
+            List<IMyTerminalControl> controls;
+            MyAPIGateway.TerminalControls.GetControls<IMyOffensiveCombatBlock>(out controls);
+            foreach (var c in controls)
+            {
+                if (HideCombatControls.Contains(c.Id))
+                {
+                    c.Visible = EmptyBool;
+                }
+            }
         }
 
         internal static void CreateCustomDecoyActions<T>(Session session) where T : IMyTerminalBlock
@@ -497,6 +536,25 @@ namespace CoreSystems
             "TrackingMode",
             "ControlModes",
 
+        };
+
+        private static readonly HashSet<string> HideCombatControls = new HashSet<string>()
+        {
+           "OffensiveCombatCircleOrbit_SelectedWeapons",
+           "OffensiveCombatCircleOrbit_AddSelectedTool",
+           "OffensiveCombatCircleOrbit_SelectedToolsList",
+           "OffensiveCombatCircleOrbit_AvailableWeapons",
+
+
+           "OffensiveCombatStayAtRange_SelectedWeapons",
+           "OffensiveCombatStayAtRange_AddSelectedTool",
+           "OffensiveCombatStayAtRange_SelectedToolsList",
+           "OffensiveCombatStayAtRange_AvailableWeapons",
+
+           "OffensiveCombatHitAndRun_SelectedWeapons",
+           "OffensiveCombatHitAndRun_AddSelectedTool",
+           "OffensiveCombatHitAndRun_SelectedToolsList",
+           "OffensiveCombatHitAndRun_AvailableWeapons"
         };
 
         internal static void AlterControls<T>(Session session) where T : IMyTerminalBlock //  https://github.com/THDigi/ElectronicsPanel/blob/master/Data/Scripts/ElectronicsPanel/ElectronicsPanelMod.cs#L244
