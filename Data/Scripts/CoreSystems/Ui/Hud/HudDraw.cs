@@ -283,10 +283,8 @@ namespace WeaponCore.Data.Scripts.CoreSystems.Ui.Hud
                 textInfo.Font = _hudFont;
                 _textAddList.Add(textInfo);
 
-
                 if (stackedInfo.WeaponStack > 1)
                 {
-
                     textInfo = _textDrawPool.Count > 0 ? _textDrawPool.Dequeue() : new TextDrawRequest();
 
                     textInfo.Text = $"(x{stackedInfo.WeaponStack})";

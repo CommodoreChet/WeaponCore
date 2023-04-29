@@ -5,6 +5,7 @@ using CoreSystems.Support;
 using Sandbox.ModAPI;
 using VRage.Input;
 using VRageMath;
+using WeaponCore.Data.Scripts.CoreSystems.Ui.Hud;
 
 namespace WeaponCore.Data.Scripts.CoreSystems.Ui
 {
@@ -290,7 +291,16 @@ namespace WeaponCore.Data.Scripts.CoreSystems.Ui
                         var set = s.Settings;
                         if (set.ClientConfig.MinimalHud && !set.ClientConfig.AdvancedMode || set.ClientConfig.AdvancedMode || s.MinimalHudOverride)
                         {
-                            set.ClientConfig.MinimalHud = !set.ClientConfig.MinimalHud;
+                            if (set.ClientConfig.MinimalHud && !set.ClientConfig.HideReload)
+                            {
+                                s.HudUi.NeedsUpdate = true;
+                                set.ClientConfig.HideReload = true;
+                            }
+                            else
+                            {
+                                set.ClientConfig.MinimalHud = !set.ClientConfig.MinimalHud;
+                                set.ClientConfig.HideReload = false;
+                            }
                             set.VersionControl.UpdateClientCfgFile();
                         }
                         else if (!set.ClientConfig.AdvancedMode)

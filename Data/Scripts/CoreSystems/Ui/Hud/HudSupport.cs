@@ -107,6 +107,25 @@ namespace WeaponCore.Data.Scripts.CoreSystems.Ui.Hud
 
         private readonly WeaponCompare _weaponCompare = new WeaponCompare();
         private readonly WeaponListCompare _weaponListCompare = new WeaponListCompare();
+        private readonly Dictionary<int, StackedWeaponInfo> _collapseNoTarget = new Dictionary<int, StackedWeaponInfo>();
+        private readonly HashSet<int> _collapseNoTargetCache = new HashSet<int>();
+
+        private void CheckNoTarget(Weapon weapon, StackedWeaponInfo swi, List<Weapon> weapons)
+        {
+            var matches = 0;
+            var noTargetMatches = 0;
+            foreach (var w in weapons)
+            {
+                if (w.System.WeaponIdHash == weapon.System.WeaponIdHash)
+                {
+                    matches++;
+                    if (!w.Target.HasTarget)
+                        noTargetMatches++;
+                }
+            }
+            if (matches == noTargetMatches)
+                _collapseNoTarget.Add(weapon.System.WeaponIdHash, swi);
+        }
 
         internal List<StackedWeaponInfo> SortDisplayedWeapons(List<Weapon> list)
         {
@@ -124,6 +143,7 @@ namespace WeaponCore.Data.Scripts.CoreSystems.Ui.Hud
                 for (int i = 0; i < list.Count; i++)
                 {
                     var w = list[i];
+
                     if (w.System.PartName.Length > _currentLargestName) 
                         _currentLargestName = w.System.PartName.Length;
 
@@ -131,11 +151,26 @@ namespace WeaponCore.Data.Scripts.CoreSystems.Ui.Hud
                     if (!_weaponStackedInfoPool.TryDequeue(out swi))
                         swi = new StackedWeaponInfo();
 
+                    if (!w.Target.HasTarget)
+                    {
+                        if (_collapseNoTarget.ContainsKey(w.System.WeaponIdHash))
+                        {
+                            var first = _collapseNoTarget[w.System.WeaponIdHash];
+                            first.WeaponStack++;
+                            _weaponStackedInfoPool.Enqueue(swi);
+                            continue;
+                        }
+                        if (_collapseNoTargetCache.Add(w.System.WeaponIdHash))
+                            CheckNoTarget(w, swi, list);
+                    }
+
+
                     if (!_textureDrawPool.TryDequeue(out swi.CachedReloadTexture))
                         swi.CachedReloadTexture = new TextureDrawData();
 
                     if (!_textureDrawPool.TryDequeue(out swi.CachedHeatTexture))
                         swi.CachedHeatTexture = new TextureDrawData();
+
 
                     swi.CachedHeatTexture.Persistant = true;
                     swi.CachedReloadTexture.Persistant = true;
@@ -144,6 +179,8 @@ namespace WeaponCore.Data.Scripts.CoreSystems.Ui.Hud
                     swi.WeaponStack = 1;
                     finalList.Add(swi);
                 }
+                _collapseNoTarget.Clear();
+                _collapseNoTargetCache.Clear();
                 return finalList;
             }
 

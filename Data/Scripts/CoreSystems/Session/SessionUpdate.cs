@@ -591,7 +591,7 @@ namespace CoreSystems
                                 /// 
                                 var addWeaponToHud = HandlesInput && !w.System.DisableStatus && (w.HeatPerc >= 0.01 || (w.ShowReload && (w.Loading || w.Reload.WaitForClient)) || ((aConst.CanReportTargetStatus || ai.ControlComp != null) && wValues.Set.ReportTarget && !w.Target.HasTarget && grids && (wComp.DetectOtherSignals && ai.DetectionInfo.OtherInRange || ai.DetectionInfo.PriorityInRange) && ai.DetectionInfo.TargetInRange(w)));
 
-                                if (addWeaponToHud && !Session.Config.MinimalHud && !enforcement.DisableHudReload && (ActiveControlBlock != null && ai.SubGridCache.Contains(ActiveControlBlock.CubeGrid) || PlayerHandWeapon != null && IdToCompMap.ContainsKey(((IMyGunBaseUser)PlayerHandWeapon).OwnerId)))
+                                if (addWeaponToHud && !Session.Config.MinimalHud && !enforcement.DisableHudReload && !Settings.ClientConfig.HideReload  && (ActiveControlBlock != null && ai.SubGridCache.Contains(ActiveControlBlock.CubeGrid) || PlayerHandWeapon != null && IdToCompMap.ContainsKey(((IMyGunBaseUser)PlayerHandWeapon).OwnerId)))
                                 {
                                     HudUi.TexturesToAdd++;
                                     HudUi.WeaponsToDisplay.Add(w);

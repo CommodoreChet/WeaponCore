@@ -109,6 +109,7 @@ namespace CoreSystems.Settings
             [ProtoMember(13)] public string CycleNextKey = MyKeys.PageDown.ToString();
             [ProtoMember(14)] public string CyclePrevKey = MyKeys.PageUp.ToString();
             [ProtoMember(15)] public bool AdvancedMode;
+            [ProtoMember(16)] public bool HideReload = false;
         }
     }
 }
