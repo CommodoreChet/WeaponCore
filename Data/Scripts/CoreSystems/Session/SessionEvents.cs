@@ -157,8 +157,11 @@ namespace CoreSystems
                 }
                 else if (combat != null)
                 {
+                    MyAPIGateway.Utilities.InvokeOnGameThread(() => CombatBlockUi<IMyOffensiveCombatBlock>(this));
+                    if (!EarlyInitOver) ControlQueue.Enqueue(typeof(IMyOffensiveCombatBlock));
                     combat.OnTargetChanged += CombatBlockTargetDirty;
                     combat.IsWorkingChanged += CombatBlockDirty;
+                    combat.OnSelectedAttackPatternChanged += CombatBlockUiDirty;
                     cube.OnClose += CombatBlockOnClose;
                 }
             }
@@ -279,6 +282,7 @@ namespace CoreSystems
             var combat = myEntity as IMyOffensiveCombatBlock;
             combat.IsWorkingChanged -= CombatBlockDirty;
             combat.OnTargetChanged -= CombatBlockTargetDirty;
+            combat.OnSelectedAttackPatternChanged -= CombatBlockUiDirty;
         }
 
         private void DecoyOnClose(MyEntity myEntity)

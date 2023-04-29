@@ -180,7 +180,11 @@ namespace CoreSystems.Control
             AddComboboxDecoyNoAction<T>(session, "PickSubSystem", Localization.GetText("TerminalDecoyPickSubSystemTitle"), Localization.GetText("TerminalDecoyPickSubSystemTooltip"), BlockUi.GetDecoySubSystem, BlockUi.RequestDecoySubSystem, BlockUi.ListDecoySubSystems, IsDecoy);
         }
 
-        internal static void AddCameraControls<T>(Session session) where T : IMyTerminalBlock
+        internal static void AddOffenseBlockControls<T>(Session session) where T : IMyTerminalBlock
+        {
+            CtcAddListBoxNoAction<T>(session, "FixedWeapons", "Fixed weapons", "Auto populated by weaponcore", BlockUi.CombatWeaponFill, BlockUi.ToolWeaponSelect, CombatAiActive, 4, true);
+        }
+            internal static void AddCameraControls<T>(Session session) where T : IMyTerminalBlock
         {
             Separator<T>(session,  "WC_cameraSep1", IsTrue);
             AddBlockCameraSliderRange<T>(session, "WC_PickCameraChannel", Localization.GetText("TerminalCameraCameraChannelTitle"), Localization.GetText("TerminalCameraCameraChannelTooltip"), BlockUi.GetBlockCamera, BlockUi.RequestBlockCamera, BlockUi.ShowCamera, BlockUi.GetMinCameraChannel, BlockUi.GetMaxCameraChannel, true);
@@ -218,6 +222,11 @@ namespace CoreSystems.Control
         internal static bool IsDecoy(IMyTerminalBlock block)
         {
             return block is IMyDecoy;
+        }
+
+        internal static bool CombatAiActive(IMyTerminalBlock block)
+        {
+            return true;
         }
 
 

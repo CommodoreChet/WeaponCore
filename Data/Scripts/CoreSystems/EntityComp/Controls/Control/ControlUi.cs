@@ -422,5 +422,19 @@ namespace CoreSystems
 
             return;
         }
+        internal static void CombatWeaponFill(IMyTerminalBlock block, List<MyTerminalControlListBoxItem> arg1, List<MyTerminalControlListBoxItem> arg2)
+        {
+            var topEntity = block.GetTopMostParent();
+            Ai ai;
+            if (Session.I.EntityToMasterAi.TryGetValue((MyEntity)topEntity, out ai))
+            {
+                foreach (var comp in ai.WeaponComps)
+                {
+                    if (comp.HasTurret || comp.HasScanTrackOnly) continue;
+                    arg1.Add(new MyTerminalControlListBoxItem(MyStringId.GetOrCompute(comp.PrimaryWeapon.FriendlyName), MyStringId.NullOrEmpty, comp.Cube));
+                }
+            }
+        }
+
     }
 }
