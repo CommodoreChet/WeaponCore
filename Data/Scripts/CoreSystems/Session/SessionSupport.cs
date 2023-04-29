@@ -1171,8 +1171,9 @@ namespace CoreSystems
                         var defId = (MyDefinitionId)toolbarItem.defId;
                         if (VanillaIds.ContainsKey(defId) || PartPlatforms.ContainsKey(defId))
                         {
-                            var index = ob.Toolbar.Slots[i].Index;
-                            message += $"*Warning* Vanilla weapon toolbar action detected in slot {index + 1}, replace with WeaponCore Group toolbar action!\n";
+                            MyVisualScriptLogicProvider.ClearToolbarSlotLocal(i, PlayerId);
+                            //var index = ob.Toolbar.Slots[i].Index;
+                           // message += $"*Warning* Vanilla weapon toolbar action detected in slot {index + 1}, replace with WeaponCore Group toolbar action!\n";
                         }
                     }
                 }
