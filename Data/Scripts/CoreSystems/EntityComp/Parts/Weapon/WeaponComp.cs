@@ -131,8 +131,8 @@ namespace CoreSystems.Platform
                     }
 
                     if (w.TurretAttached) {
-                        w.Azimuth = w.System.HomeAzimuth;
-                        w.Elevation = w.System.HomeElevation;
+                        w.Azimuth = 0;
+                        w.Elevation = 0;
                         w.AimBarrel();
                     }
                 }
