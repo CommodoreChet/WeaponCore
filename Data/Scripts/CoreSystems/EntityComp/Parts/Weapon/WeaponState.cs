@@ -36,8 +36,8 @@ namespace CoreSystems.Platform
             if (!Target.HasTarget)
             {
                 EventTriggerStateChanged(EventTriggers.Tracking, false);
-                //if (InCharger) 
-                //    ExitCharger = true;
+                if (InCharger) 
+                    ExitCharger = true;
 
                 if (Session.I.MpActive && Session.I.IsServer)  {
                     TargetData.ClearTarget();
