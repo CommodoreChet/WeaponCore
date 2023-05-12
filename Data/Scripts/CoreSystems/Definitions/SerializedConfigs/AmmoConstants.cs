@@ -1023,7 +1023,7 @@ namespace CoreSystems.Support
             virtualBeams = ammoDef.Beams.VirtualBeams && IsBeamWeapon;
             rotateRealBeam = ammoDef.Beams.RotateRealBeam && VirtualBeams;
             convergeBeams = !RotateRealBeam && ammoDef.Beams.ConvergeBeams && VirtualBeams;
-            oneHitParticle = ammoDef.Beams.OneParticle && IsBeamWeapon && VirtualBeams;
+            oneHitParticle = ammoDef.Beams.OneParticle && IsBeamWeapon;
             offsetEffect = ammoDef.AmmoGraphics.Lines.OffsetEffect.MaxOffset > 0.2 && ammoDef.AmmoGraphics.Lines.OffsetEffect.MinLength > 0.1;
             fakeVoxelHits = (uint) ammoDef.Beams.FakeVoxelHitTicks;
         }
